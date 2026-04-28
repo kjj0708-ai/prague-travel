@@ -1,0 +1,21 @@
+{
+  "entities": {
+    "itinerary": {
+      "title": "Itinerary",
+      "description": "Prague travel itinerary data",
+      "type": "object",
+      "properties": {
+        "days": {
+          "type": "array",
+          "description": "List of day plans"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "itineraries/{userId}": {
+      "schema": "itinerary",
+      "description": "User specific itinerary data"
+    }
+  }
+}

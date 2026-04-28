@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net: Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // 1. Itineraries Collection
+    match /itineraries/{userId} {
+      allow get, write: if isOwner(userId) && isValidId(userId);
+      
+      // Validation helper for itinerary document
+      function isValidItinerary(data) {
+        return data.keys().hasAll(['days', 'updatedAt']) 
+               && data.days is list 
+               && data.updatedAt == request.time;
+      }
+      
+      // Allow creation/update if valid
+      allow create, update: if isOwner(userId) && isValidItinerary(request.resource.data);
+    }
+  }
+}
